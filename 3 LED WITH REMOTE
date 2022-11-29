@@ -1,0 +1,77 @@
+#include <IRremote.h>
+
+int IrReceiverPin = 12;                 // Turn the variable "IrReceiverPin" to pin 12
+IRrecv irrecv(IrReceiverPin);           // create a new instance of "irrecv" and save this instance in variabele "IRrecv"
+decode_results results;                 // define the variable "results" to store the received button code
+
+
+void setup() {
+  Serial.begin(9600);                 // Initialise the serial monitor on Band 9600. 
+
+  pinMode(9, OUTPUT);     //These 3 pins (9, 10, 11) are set as outputs.  
+  pinMode(10, OUTPUT);    //The pins can be changed but can't be 12. 
+  pinMode(11, OUTPUT);    //13 is usable, but it will control the Arduino LED too.
+   
+  
+  Serial.println("Starting IR-receiver...");
+
+  irrecv.enableIRIn();                // start the IR-receiver
+
+  Serial.println("IR-receiver active");
+
+  digitalWrite(9, HIGH);    //This section of code can be used as a debug. It will flash each LED once and then shut them all off. 
+  delay(1000);              //If you change the OUTPUT pins, you should change them here to avoid errors when compiling.
+  digitalWrite(10, HIGH);   
+  digitalWrite(9, LOW);
+  delay(1000);
+  digitalWrite(11, HIGH);
+  digitalWrite(10, LOW);
+  delay(200)
+  digitalWrite(9, LOW);
+  digitalWrite(10, LOW);
+  digitalWrite(11, LOW);
+}
+
+void loop() {
+  
+    // When the IR-receiver receives a signal
+    if (irrecv.decode(&results)) {
+
+        // Print the received value as a hexadecimal value
+        Serial.println(results.value, HEX);
+
+        // Resume the IR-receiver to listen for new signals
+        irrecv.resume();
+
+        // Determine which button has been pressed
+        switch (results.value) {
+            case 0xFF6897:  // button 0 :   Turns all of the LEDs on
+                digitalWrite(9, HIGH);    // HIGH means On, or in terms of Binary, 1.
+                digitalWrite(10, HIGH);   // HIGH means On, or in terms of Binary, 1.
+                digitalWrite(11, HIGH);   // HIGH means On, or in terms of Binary, 1.
+                break;
+            
+            case 0xFF30Cf:  // button 1 :   Turns the LED connected to Pin 9 on while turning the other pins off. 
+                digitalWrite(9, HIGH);   // HIGH means On, or in terms of Binary, 1.
+                digitalWrite(10, LOW);   // LOW means off, or in terms of Binary, 0.
+                digitalWrite(11, LOW);   // LOW means off, or in terms of Binary, 0.
+                break;
+
+            case 0xFF18E7:  // button 2 :  Turns the LED connected to Pin 10 on while turning the other pins off.
+                digitalWrite(9, LOW);     // LOW means off, or in terms of Binary, 0.
+                digitalWrite(10, HIGH);   // HIGH means On, or in terms of Binary, 1.
+                digitalWrite(11, LOW);    // LOW means off, or in terms of Binary, 0.
+                break; 
+
+            case 0xFF7A85:  // button 3 :  Turns the LED connected to Pin 11 on while turning the other pins off.
+                digitalWrite(9, LOW);   // LOW means off, or in terms of Binary, 0.
+                digitalWrite(10, LOW);  // LOW means off, or in terms of Binary, 0.
+                digitalWrite(11, HIGH); // HIGH means On, or in terms of Binary, 1.
+                break;
+               
+            }
+
+    }
+  
+    delay(110);      // pause 110ms
+}
